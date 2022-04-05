@@ -1,0 +1,9 @@
+{
+  "header": {
+    "abc": "xyz",
+    "qwerty": 1
+  },
+  "event": {
+    "payload": "{\"field1\":\"123456\",\"field2\":\"abcdef\"}"
+  }
+}
