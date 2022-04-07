@@ -14,6 +14,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * The transformation applies `jq` expression either to key or value of the message
+ * and puts the result in the same place as the source.
+ * @param <R>
+ */
 public abstract class JqTransformation<R extends ConnectRecord<R>> implements Transformation<R> {
 
   private JsonQuery query;
@@ -44,6 +49,9 @@ public abstract class JqTransformation<R extends ConnectRecord<R>> implements Tr
   }
 
   public Object transform(Schema schema, Object object) {
+    if (query == null) {
+      throw new IllegalStateException("query null, transformation not configured");
+    }
     if (object == null) {
       return null;
     }
@@ -55,33 +63,37 @@ public abstract class JqTransformation<R extends ConnectRecord<R>> implements Tr
 
   public String transform(String json) {
 
+    final ObjectMapper om = new ObjectMapper();
+    final JsonNode parsed;
     try {
-      ObjectMapper om = new ObjectMapper();
-      JsonNode parsed = om.readTree(json);
-
-      Scope rootScope = Scope.newEmptyScope();
-      rootScope.loadFunctions(Scope.class.getClassLoader());
-
-      final List<JsonNode> result = query.apply(rootScope, parsed);
-
-      if (result == null) {
-        return "";
-      }
-
-      return result.stream()
-              .map(node->{
-                try {
-                  return om.writeValueAsString(node);
-                } catch (Exception e) {
-                  throw new ConnectException(e);
-                }
-              })
-              .peek(x->System.out.println(x))
-              .collect(Collectors.joining());
-
+      parsed = om.readTree(json);
     } catch (Exception e) {
       throw new ConnectException("Failed executing jq query", e);
     }
+
+    Scope rootScope = Scope.newEmptyScope();
+    rootScope.loadFunctions(Scope.class.getClassLoader());
+
+    final List<JsonNode> result;
+    try {
+      result = query.apply(rootScope, parsed);
+    } catch (Exception e) {
+      throw new ConnectException("Failed executing jq query", e);
+    }
+
+    if (result == null) {
+      return "";
+    }
+
+    return result.stream()
+            .map(node->{
+              try {
+                return om.writeValueAsString(node);
+              } catch (Exception e) {
+                throw new ConnectException(e);
+              }
+            })
+            .collect(Collectors.joining());
 
   }
 
