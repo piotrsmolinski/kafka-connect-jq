@@ -11,10 +11,10 @@
     </description>
 
     <scm>
-        <connection>scm:git:https://github.com/piotrsmolinski/kafka-conect-jq.git</connection>
-        <developerConnection>scm:git:git@github.com:piotrsmolinski/kafka-conect-jq.git</developerConnection>
-        <url>https://github.com/piotrsmolinski/kafka-conect-jq</url>
         <tag>HEAD</tag>
+        <connection>scm:git:https://github.com/piotrsmolinski/kafka-connect-jq.git</connection>
+        <developerConnection>scm:git:git@github.com:piotrsmolinski/kafka-connect-jq.git</developerConnection>
+        <url>https://github.com/piotrsmolinski/kafka-connect-jq</url>
     </scm>
 
     <properties>
